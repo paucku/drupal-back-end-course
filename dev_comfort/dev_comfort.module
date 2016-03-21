@@ -1,0 +1,12 @@
+<?php
+
+/**
+ * Implements hook_FORM_ID_alter()
+ */
+
+function devel_execute_form_alter(&$form, &$form_state, $form_id){
+    $form['execute']['code']= array('#weight' => 40);
+    $form['execute']['op'] = array('weight' => 0);
+}
+
+

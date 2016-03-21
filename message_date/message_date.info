@@ -1,0 +1,5 @@
+name = Messaging Date
+description = Prints current date in the Message area.
+package = Drupal Back-end
+core = 7.x
+configure = admin/config/message_date

@@ -1,0 +1,7 @@
+name = Messaging Date With Tabs
+description = Prints current date in the Message area BUT the config is with tabs.
+package = Drupal Back-end
+core = 7.x
+configure = admin/config/menu-homework-message-date
+files[] = menu_homework_message_date.admin.inc
+files[] = menu_homework_message_date.module

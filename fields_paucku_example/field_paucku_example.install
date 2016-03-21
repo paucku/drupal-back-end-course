@@ -1,0 +1,18 @@
+<?php
+
+ 
+/**
+* Implements hook_field_schema().
+*/
+function field_paucku_example_field_schema($field) {
+    $columns = array(
+        'rgb' => array('type' => 'varchar', 'length' => 7, 'not null' => FALSE),
+    );
+    $indexes = array(
+        'rgb' => array('rgb'),
+    );
+    return array(
+        'columns' => $columns,
+        'indexes' => $indexes,
+    );
+}

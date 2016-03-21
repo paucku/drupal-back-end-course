@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * Implements hook_schema()
+ */
+
+function student_schema(){
+  return array(
+    'student_records' => array(
+      'description' => t('Various data about students.'),
+      'fields' => array(
+        'sid' => array(
+          'description' => t('Student ID'),
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'name' => array(
+          'description' => t("Student's name."),
+          'type' => 'varchar',
+          'not null' => TRUE,
+          'length' => 64,
+        ),
+        'gender' => array(
+          'description' => t('Gender of the student.'),
+          'type' => 'char',
+          'not null' => TRUE,
+          'lenght' => 10,
+        ),
+        'faculty_number' => array(
+          'description' => t('The faculty number of the student.'),
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+      ),
+      'primary key' => array('sid'),
+    ),
+  );
+}
+

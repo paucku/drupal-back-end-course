@@ -1,0 +1,63 @@
+<?php
+
+function message_date_init(){
+    $is_message_date_enabled = variable_get('message_date_enable_message');
+    $message_type = variable_get('message_date_type');
+    if ($is_message_date_enabled == 1){
+       $date = date("l, F j, Y");
+        drupal_set_message(t('Today is ') . $date, $message_type);
+    }
+ }
+
+/*
+ * Implements hook menu
+ */
+
+function message_date_menu(){
+    $items['admin/config/message_date'] = array(
+        'title' => t('My Message Date Config Page'),
+        'description' => t('A lenghty description'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('message_date_settings_form'),
+        'access callback' => TRUE,
+        'type' => MENU_NORMAL_ITEM,
+    );
+    
+//     drupal_get_form($form_id);
+    
+    return $items;
+}
+
+function message_date_settings_form($form, $form_state){
+    $form['message_date_enable_message'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable current date message.'),
+        '#default_value' => variable_get('message_date_enable_message'),
+    );
+    $form['message_date_type'] = array(
+        '#type' => 'select',
+        '#title' => t('Message type'),
+        '#options' => drupal_map_assoc(array(t('status'), t('warning'), t('error'))),
+        '#default_value' => variable_get('message_date_type'),
+    );
+    return system_settings_form($form);
+}
+
+
+
+/*
+ * Config page callback for Message Date
+ */
+// function message_date_setting_page(){
+//     print 'My Message Date Config Page';
+// }
+
+// function message_date_access(){
+//     global $user;
+//     if ($user){
+//         return TRUE;
+//     }
+//     else {
+//         return FALSE;
+//     }
+// }

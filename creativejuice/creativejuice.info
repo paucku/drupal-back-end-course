@@ -1,0 +1,6 @@
+name = Creative Juice
+description = "Adds a random sentence filter to content."
+package = Drupal Back-end
+core = 7.x
+files[] = creativejuice.module
+php = 5.2

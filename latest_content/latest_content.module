@@ -1,0 +1,187 @@
+<?php
+
+/**
+ * Implements hook_permission()
+ */
+
+function latest_content_menu(){
+  $items['admin/config/content/latest-config-content'] = array (
+    'title' => t('Latest content config'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('latest_content_admin_settings_form'),
+    'access arguments' => array('administer latest content config'),
+    'file' => 'latest_content.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['latest-content-page'] = array (
+    'title' => t('Latest content config page'),
+    'page callback' => 'latest_content_page',
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function latest_content_page(){
+  $block = module_invoke('latest_content', 'block_view', 'latest_nodes_by_type');
+  $output = render($block['content']);
+  return $output;
+}
+ 
+function latest_content_permission(){
+  return array(
+    'administer latest content config' => array(
+      'title' => t('Administer latest content config'),
+      'description' => t('Perform administration tasks for latest content module.'),
+    ),
+  );
+}
+
+
+function latest_content_help($path, $arg){
+  switch ($path) {
+    // Main module help for the block module
+    case 'admin/help#latest_content':
+      return '<p>' . t('This module print tha latest content in a block.') . '</p>';
+
+      // Help for another path in the block module
+    case 'admin/config/content/latest-config-content':
+      return '<p>' . t('You now can set how much content to be shown in the Latest Content block') . '</p>';
+  }
+}
+
+function latest_content_block_info(){
+  $blocks['latest_unpublished_nodes'] = array(
+    'info' => t('Unpublished nodes'),
+    'status' => TRUE,
+    'region' => 'sidebar_first',
+    'weight' => 0,
+    'visibility' => 0,
+  );
+  $blocks['latest_nodes_by_type'] = array(
+    'info' => t('Latest nodes by type'),
+    'status' => TRUE,
+    'region' => 'sidebar_first',
+    'weight' => -1,
+    'visibility' => 0,
+  ); 
+  
+  return $blocks;
+}
+
+function latest_content_block_configure($delta){
+  $form = array();
+  switch($delta){
+    case 'latest_unpublished_nodes':
+      $form['latest_unpublished_nodes_count'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Configure Number of Nodes to Display'),
+        '#size' => 5,
+        '#description' => t('Enter the number of unpublished nodes that will appear in the block.'),
+        '#default_value' => variable_get('latest_unpublished_nodes_count', variable_get('latest_content_default_count', 10)),
+      );
+      break;
+    case 'latest_nodes_by_type':
+      $form['latest_nodes_by_type_count'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Configure Number of Nodes by type to Display'),
+        '#size' => 5,
+        '#description' => t('Enter the number of nodes by type that will appear in the block.'),
+        '#default_value' => variable_get('latest_nodes_by_type_count', variable_get('latest_nodes_by_type_count', 10)),
+      );
+      $form['latest_nodes_by_type_type'] = array(
+        '#type' => 'textfield',
+        '#title' => t('The type of the nodes to display'),
+        '#size' => 50,
+        '#description' => t('Enter the type of the nodes that will appear in the block. If nothig is set all node type will be shown.'),
+        '#default_value' => variable_get('latest_nodes_by_type_type', variable_get('latest_nodes_by_type_type', '')),
+      );
+      break;
+  }
+  return $form;
+}
+
+function latest_content_block_save($delta = '', $edit = array()){
+  switch($delta) {
+    case 'latest_unpublished_nodes':
+      variable_set('latest_unpublished_nodes_count', (int)$edit['latest_unpublished_nodes_count']);
+      break;      
+    case 'latest_nodes_by_type':
+      variable_set('latest_nodes_by_type_count', (int)$edit['latest_nodes_by_type_count']);
+      variable_set('latest_nodes_by_type_type', $edit['latest_nodes_by_type_type']);
+      break;
+  }
+}
+
+function latest_content_block_view($delta = ''){
+  switch($delta) {
+    case 'latest_unpublished_nodes':
+      $block['subject'] = t('Latest unpublished nodes');
+      $block['content'] = latest_content_block_contents($delta);
+      return $block;
+      break;
+    case 'latest_nodes_by_type':
+      $block['subject'] = t('Latest nodes by type');
+      $block['content'] = latest_content_block_contents($delta);
+      return $block;
+      break;
+  }
+}
+
+
+function latest_content_block_contents($delta){
+  switch($delta) {
+    case 'latest_unpublished_nodes':
+      if (user_access('administer nodes')){
+        $number_nodes = variable_get('latest_unpublished_nodes_count', variable_get('latest_content_default_count', 10));
+        $results = db_query_range(
+          'SELECT `nid`, `title` FROM {node} n WHERE `status` = 0 ORDER BY `created` DESC', 0, $number_nodes);
+        $items = array();
+        foreach ($results as $result){
+          $items[] = l($result->title, 'node/' . $result->nid . '/edit');
+        }
+        return array('#markup' => theme('item_list', array('items' => $items)));
+      }
+      break;
+    case 'latest_nodes_by_type':
+      if (user_access('administer nodes')){
+        $number_nodes = variable_get('latest_nodes_by_type_count', variable_get('latest_nodes_by_type_count', 10));
+        $node_type = variable_get('latest_nodes_by_type_type', '');
+        $query =  db_select('node', 'n')
+          ->fields('n', array('nid', 'title'))
+          ->orderBy('created', 'DESC')
+          ->range(0, $number_nodes);
+        if($node_type){
+          $query->condition('type', $node_type, '=');
+        }
+        $results = $query->execute();
+        $items = array();
+        foreach ($results as $result){
+          $items[] = l($result->title, 'node/' . $result->nid . '/edit');
+        }
+        return array('#markup' => theme('item_list', array('items' => $items)));
+      }
+      break;
+  }
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function latest_content_theme_registry_alter(&$theme_registry) {
+    // Defined path to the current module.
+    $module_path = drupal_get_path('module', 'latest_content');
+    // Find all .tpl.php files in this module's folder recursively.
+    $template_file_objects = drupal_find_theme_templates($theme_registry, '.tpl.php', $module_path);
+    // Iterate through all found template file objects.
+    foreach ($template_file_objects as $key => $template_file_object) {
+        // If the template has not already been overridden by a theme.
+        if (!isset($theme_registry[$key]['theme path']) || !preg_match('#/themes/#', $theme_registry[$key]['theme path'])) {
+            // Alter the theme path and template elements.
+            $theme_registry[$key]['theme path'] = $module_path;
+            $theme_registry[$key] = array_merge($theme_registry[$key], $template_file_object);
+            $theme_registry[$key]['type'] = 'module';
+        }
+    }
+}

@@ -1,0 +1,134 @@
+<?php 
+
+/**
+ * Implement hook_menu()
+ */ 
+
+function menufun_menu(){
+    $items['menufun'] = array(
+        'title' => 'Greeting',
+        'page callback' => 'menufun_hello1',
+        'access callback' => 'user_access',
+        'access arguments' => array('access menufun'),
+        'file' => 'includes/menufun_callbacks.inc',
+        'type' => MENU_CALLBACK,
+    );
+    $items['menufun/%'] = array(
+        'title' => 'Greeting',
+        'page callback' => 'menufun_hello',
+        'page arguments' => array(1),
+        'access callback' => 'user_access',
+        'access arguments' => array('access menufun'),
+        'file' => 'includes/menufun_callbacks.inc',
+        'type' => MENU_CALLBACK,
+    );
+    $items['menufun/%/%'] = array(
+        'title callback' => 'menufun_title',
+        'title arguments' => array(2),
+        'page callback' => 'menufun_hello',
+        'page arguments' => array(1),
+        'access callback' => 'user_access',
+        'access arguments' => array('access menufun'),
+        'file' => 'includes/menufun_callbacks.inc',
+        'type' => MENU_CALLBACK,
+    );
+    $items['admin/config/menufun'] = array(
+        'title' => 'MenuFun config page',
+        'page callback' => 'menufun_overview',
+        'access callback' => TRUE,
+        'type' => MENU_NORMAL_ITEM,
+    );
+    $items['admin/config/menufun/overview'] = array(
+        'title' => 'Overview',
+        'access callback' => TRUE,
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'weight' => 1,
+    );
+    $items['admin/config/menufun/first'] = array(
+        'title' => 'First',
+        'page callback' => 'menufun_first',
+        'access callback' => TRUE,
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 0,
+    );
+    $items['admin/config/menufun/second'] = array(
+        'title' => 'Second',
+        'page callback' => 'menufun_second',
+        'access callback' => TRUE,
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 0,
+    );
+    return $items;
+}
+/**
+ * Access callback for menufun/%
+ */
+function menufun_access(){
+    return false;
+}
+
+/**
+ * Title callback for menufun/%
+ */
+function menufun_title($title){
+    return "My title is: $title";
+}
+
+/**
+ * Title callback for node/%node/edit
+ */
+function menufun_title1($node){
+    return "Edit node " . $node->title . " My Module Title";
+}
+
+/**
+ * Page callback for admin/config/menufun
+ */
+
+function menufun_overview(){
+    return t('This is MenuFun overview');
+}
+
+/**
+ * Page callback for admin/config/menufun/fist
+ */
+
+function menufun_first(){
+    return t('This is MenuFun first tab');
+}
+
+/**
+ * Page callback for admin/config/menufun/second
+ */
+
+function menufun_second(){
+    return t('This is MenuFun second tab');
+}
+
+
+/**
+ * Implements hook_menu_alter
+ */
+
+function menufun_menu_alter(&$items){
+  $items['node/%node/edit'] =array(
+    'title callback' => 'menufun_title1',
+    'title arguments' => array(1),
+  );
+}
+ 
+/**
+ * Implement hook_permission()
+ */ 
+
+function menufun_permission(){
+  return array(
+    'access menufun' => array(
+      'title' => t('Access Menu Fun'),
+      'description' => t('Gives premission to access Munu Fun.'),
+    ),
+  );
+}
+
+
+

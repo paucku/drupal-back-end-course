@@ -1,0 +1,79 @@
+<?php
+
+function menu_homework_message_date_init(){
+    $is_shown_for_anonymous = variable_get('menu_homework_message_date_show_anonymous');
+    $is_menu_homework_message_date_enabled = variable_get('menu_homework_message_date_enable_message');
+    $message_type = variable_get('menu_homework_message_date_type');
+    if ($is_menu_homework_message_date_enabled == 1){
+        if ($is_shown_for_anonymous == 1 || (user_is_logged_in() && user_access('administer current date message'))){
+            $date = date("l, F j, Y");
+            drupal_set_message(t('Today is ') . $date, $message_type);
+        }
+    }
+ }
+
+/*
+ * Implements hook menu
+ */
+
+function menu_homework_message_date_menu(){
+    $items['admin/config/menu-homework-message-date'] = array(
+        'title' => t('My Message Date Config Page'),
+        'description' => t('A lenghty description'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('menu_homework_message_date_settings_form'),
+        'access callback' => 'user_access',
+        'access arguments' => array('administer current date message'),
+        'file' => 'menu_homework_message_date.admin.inc',
+        'type' => MENU_NORMAL_ITEM,
+    );
+    $items['admin/config/menu-homework-message-date/overview'] = array(
+        'title' => t('Overview'),
+        'access callback' => 'user_access',
+        'access arguments' => array('administer current date message'),
+        'file' => 'menu_homework_message_date.admin.inc',
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'weight' => 0,
+    );
+    $items['admin/config/menu-homework-message-date/advanced'] = array(
+        'title' => t('Advanced'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('menu_homework_message_date_advanced_settings_form'),
+        'access callback' => 'user_access',
+        'access arguments' => array('administer current date message'),
+        'file' => 'menu_homework_message_date.admin.inc',
+        'type' => MENU_LOCAL_TASK,
+        'weight' => 1,
+    );
+    return $items;
+}
+
+/**
+ * Implements hook_permission
+ */
+ 
+function menu_homework_message_date_permission(){
+    return array(
+        'administer current date message' => array(
+            'title' => t('Administer current date message'),
+            'description' => t('Gives permission to administer the showing of the current date.'),
+        ),
+    );
+}
+
+/**
+ * Implement hook_form_alter()
+ */ 
+
+function menu_homework_message_date_form_alter(&$form, &$form_state, $form_id){
+    if(!($form_id == 'user_register_form' || $form_id == 'user_profile_form')) {
+        return;
+    }
+    $form['accept_terms'] = array(
+        '#type' => 'checkbox',
+        '#description' => t('By registering at %site-nam, you agree that at any time, we can enter your home.', 
+            array('%site-name' => variable_get('site_name', 'drupal'))),
+        '#default_value'=> FALSE,
+        '#title' => 'Check me!',
+    );
+}

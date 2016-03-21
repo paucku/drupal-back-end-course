@@ -1,0 +1,5 @@
+name = Development Comfort
+description = Moves execute button above
+core = 7.x
+dependencies[] = devel
+package = Drupal Back-end

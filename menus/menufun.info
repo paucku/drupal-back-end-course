@@ -1,0 +1,4 @@
+name = A module with menu
+description = Defines a user accessible menu.
+core = 7.x
+package = Drupal Back-end

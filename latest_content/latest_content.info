@@ -1,0 +1,6 @@
+name = Latest Content
+description = Lists the latest content
+core = 7.x
+package = Drupal Back-end
+
+configure = admin/config/content/latest-config-content

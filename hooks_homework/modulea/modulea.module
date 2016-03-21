@@ -1,0 +1,108 @@
+<?php
+
+/**
+ * Hooks and functions for Module A
+ */
+
+/**
+ * Implements hook_helloworld
+ */
+
+function modulea_helloworld(){
+  drupal_set_message('Module A Hello World');
+}
+
+/**
+ * Implements hook_help().
+ */
+ 
+function modulea_help($path, $arg) {
+  switch ($path) {
+    case 'admin/config/content/modulea-config':
+      return '<p>' . t('This is the config page help.') . '</p>';
+
+    case 'admin/help#modulea':
+      $output = '';
+      $output .= '<p>' . t('Module A does nothing.') . '</p>';
+      return $output;
+  }
+}
+
+
+
+
+function modulea_init(){
+    $is_modulea_enabled = variable_get('modulea_enable_message');
+    $message_type = variable_get('modulea_type');
+    if ($is_modulea_enabled == 1){
+       $date = date("l, F j, Y");
+        drupal_set_message(t('Today is ') . $date, $message_type);
+    }
+    module_invoke_all('helloworld');
+ }
+
+/*
+ * Implements hook menu
+ */
+
+function modulea_menu(){
+    $items['admin/config/content/modulea-config'] = array(
+        'title' => t('My Module A Config Page'),
+        'description' => t('A lenghty description'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('modulea_admin_settings'),
+//         'access callback' => 'user_access',
+        'access argument' => array('administer modulea'),
+        'file' => 'modulea.admin.inc',
+        'type' => MENU_NORMAL_ITEM,
+    );
+    
+//     drupal_get_form($form_id);
+    
+    return $items;
+}
+
+function modulea_settings_form($form, $form_state){
+    $form['modulea_enable_message'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable current date message.'),
+        '#default_value' => variable_get('modulea_enable_message'),
+    );
+    $form['modulea_type'] = array(
+        '#type' => 'select',
+        '#title' => t('Message type'),
+        '#options' => drupal_map_assoc(array(t('status'), t('warning'), t('error'))),
+        '#default_value' => variable_get('modulea_type'),
+    );
+    return system_settings_form($form);
+}
+
+/*
+ * Implements hook permission
+ */
+ 
+function modulea_permission(){
+  return array(
+    'administer modulea' => array(
+      'title' => t('Administer Module A'),
+      'description' => t('Perform administration tasks for my Module A.'),
+    ),
+  );
+}
+ 
+/*
+ * Config page callback for Message Date
+ */
+// function modulea_setting_page(){
+//     print 'My Message Date Config Page';
+// }
+
+// function modulea_access(){
+//     global $user;
+//     if ($user){
+//         return TRUE;
+//     }
+//     else {
+//         return FALSE;
+//     }
+// }

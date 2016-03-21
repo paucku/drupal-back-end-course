@@ -1,0 +1,4 @@
+name = RegForm Alter
+description = Alter the registration and profile forms.
+core = 7.x
+package = Drupal Back-end

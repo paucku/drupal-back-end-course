@@ -1,0 +1,6 @@
+name = Job Post Content type 
+description = New content type which allaws to post a job post.
+core = 7.x
+package = Drupal Back-end
+files[] = job_post.install
+files[] = job_post.module

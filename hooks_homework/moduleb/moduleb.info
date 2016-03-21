@@ -1,0 +1,5 @@
+name = Module B
+description = Second Example Module
+package = Drupal Back-end
+core = 7.x
+dependencies[] = modulea

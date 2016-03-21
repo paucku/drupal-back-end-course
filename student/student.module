@@ -1,0 +1,175 @@
+ <?php
+
+ 
+ /**
+ * Implements hook_permissions()
+ */
+
+function student_permission() {
+  return array(
+    'access students content' => array(
+      'title' => t('Access students content'),
+      'description' => t('Allows access to the content of the student.'),
+    ),
+    'edit students content' => array(
+      'title' => t('Edit students content'),
+      'description' => t('Allows edit to the content of the student.'),
+    ),
+    'delete students content' => array(
+      'title' => t('Delete students content'),
+      'description' => t('Allows deletion to the content of the student.'),
+    ),
+  );
+}
+
+ /**
+ * Implements hook_menu()
+ */
+
+function student_menu() { 
+  $items['add-students'] = array(
+    'title' => 'Add studens',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('student_addform'),
+    'access callback' => 'user_access',
+    'access arguments' => array('edit students content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['students'] = array(
+    'title' => 'List of all students',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('student_accessform'),
+    'access callback' => 'user_access',
+    'access arguments' => array('access students content'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  return $items;
+}
+
+function student_addform(){
+  $form['student_name'] = array(
+    '#title' => t('Student Name'),
+    '#type' => 'textfield',
+    '#description' => t('Please enter student name.'),
+    '#required' => TRUE,
+  );   
+  $form['gender'] = array(
+    '#type' => 'radios',
+    '#title' => t('Gender'),
+    '#options' => array('m' => t('Male'), 'f' => t('Female')),
+    '#description' => t('Are you male or female?'),
+    '#access' => TRUE,
+    '#required' => TRUE,
+  );
+  $form['faculty_number'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Faculty Number'),
+    '#description' => t('What is the sdsatudent' . "'" . 's faculty number'),
+    '#size' => 8,
+    '#maxlength' => 8,
+    '#required' => TRUE,
+    '#access' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit')
+  );
+  return $form;
+}
+
+function student_accessform(){
+  $header = array(
+    array('data' => 'Name', 'field' => 'name', 'sort' => 'ASC'),
+    array('data' => 'Gender', 'field' => 'gender'),
+    array('data' => 'Faculty number', 'field' => 'faculty_number',),
+  );
+  $rows = array();
+  $no_yes = array('No', 'Yes');
+  
+  $results = db_select('student_records','s')
+    ->extend('TableSort')
+    ->fields('s', array('name', 'gender', 'faculty_number'))
+    ->orderByHeader($header)
+    ->execute();
+//  dpm($results);
+  $forms['table'] = array(
+      '#type' => 'form',
+      '#header'=> $header,
+      '#access' => TRUE,
+  );
+  foreach ($results as $student){
+    $forms['table'][$student->name] = array(
+      '#type' => 'form',
+    );  
+    $forms['table'][$student->name][$student->name] = array(
+      '#type' => 'textfield',
+      '#default_value' => $student->name,
+//      '#required' => TRUE,
+    );
+    $forms['table'][$student->name][$student->gender] = array(
+      '#type' => 'textfield',
+      '#default_value' => $student->gender,
+//      '#required' => TRUE,
+    );    
+    $forms['table'][$student->name][$student->faculty_number] = array(
+      '#type' => 'textfield',
+      '#default_value' => $student->faculty_number,
+//      '#required' => TRUE,
+    );
+    $forms['table'][$student->name]['edit_student'] = array(
+      '#type' => 'button',
+      '#title' => 'Edit student',
+//      '#required' => TRUE,
+    );
+     
+  }
+  dpm($forms, 'Forms');
+  
+  return $forms;
+}
+
+function student_accessform_validate($form, &$form_state) {}
+function student_accessform_submit($form, &$form_state) {}
+
+
+function student_addform_validate($form, &$form_state) {
+  dpm($form_state['input']['gender'], 'Form state');
+  $faculty_number = $form_state['values']['faculty_number'];
+  $gender = $form_state['values']['gender'];
+  
+  if (!is_numeric($faculty_number)){
+    form_set_error('faculty_number', t('Faculty number can only be digits!'));
+  }
+  
+  /*if ($gender !== '0' && $gender !== '1'){
+    form_set_error('gender', t('Gender should be male or female'));    
+  }*/
+  
+}
+
+function student_addform_submit($form, &$form_state) {
+//  dpm($form, 'Form');
+  dpm($form_state['input']['gender'], 'Form inputs');
+  $student_name = $form_state['input']['student_name'];
+  $gender = $form_state['input']['gender'];
+  
+  /*switch ((int)$gender){
+    case 0:
+      $gender = 'm';
+      break;
+    case 1:
+      $gender = 'f';
+      break;
+  }*/
+  
+  $faculty_number = $form_state['input']['faculty_number'];
+  db_insert('student_records')
+    -> fields(array(
+      'name' => $student_name,
+      'gender' => $gender,
+      'faculty_number' => $faculty_number,
+    )
+      
+    )->execute();
+}
