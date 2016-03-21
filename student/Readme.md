@@ -1,4 +1,4 @@
-This is the homework project of Drupal Back-end Course
+This is the homework project of Drupal Back-end Course. The homework is not somplete and doesn't work properly.
 
 Create a drupal module called “students” that does the following:
 
